@@ -1,13 +1,17 @@
 import ffmpeg from "fluent-ffmpeg";
-import ffmpegStatic from "ffmpeg-static";
 import os from "os";
 import path from "path";
+import { getFfmpegPath } from "./binary";
 import { getEffectConfig } from "./effects";
 import type { VoiceEffect } from "@/types/voice";
 
-// Point fluent-ffmpeg at the bundled static binary
-if (ffmpegStatic) {
-  ffmpeg.setFfmpegPath(ffmpegStatic);
+let ffmpegConfigured = false;
+
+/** Configure fluent-ffmpeg with the resolved binary path (lazy, once per cold start) */
+function ensureFfmpegConfigured(): void {
+  if (ffmpegConfigured) return;
+  ffmpeg.setFfmpegPath(getFfmpegPath());
+  ffmpegConfigured = true;
 }
 
 export interface ProcessAudioOptions {
@@ -30,6 +34,7 @@ export function processAudio({
   outputPath,
   effect,
 }: ProcessAudioOptions): Promise<ProcessAudioResult> {
+  ensureFfmpegConfigured();
   const { filter } = getEffectConfig(effect);
 
   return new Promise((resolve, reject) => {

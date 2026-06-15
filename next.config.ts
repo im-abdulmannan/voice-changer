@@ -4,6 +4,14 @@ const nextConfig: NextConfig = {
   // FFmpeg packages must run on the server — exclude from client bundling
   serverExternalPackages: ["fluent-ffmpeg", "ffmpeg-static"],
 
+  // Include the FFmpeg binary in the serverless function bundle (required on Vercel)
+  outputFileTracingIncludes: {
+    "/api/process": [
+      "./node_modules/ffmpeg-static/ffmpeg",
+      "./node_modules/ffmpeg-static/ffmpeg.exe",
+    ],
+  },
+
   experimental: {
     // Allow larger file uploads via server actions (25MB max)
     serverActions: {
